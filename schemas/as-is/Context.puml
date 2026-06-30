@@ -1,0 +1,16 @@
+@startuml
+title as is Context Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the system")
+Person(installer, "Installer", "An installer connecting houses to the system")
+System(SmartHome, "SmartHome", "Smart home management system")
+
+Rel(user, SmartHome, "Uses the system")
+Rel(user, installer, "Depends on to use the system")
+Rel(installer,SmartHome,"Connects users to the system")
+
+@enduml
