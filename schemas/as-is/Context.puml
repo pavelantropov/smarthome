@@ -6,11 +6,14 @@ top to bottom direction
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
 Person(user, "User", "A user of the system")
-Person(installer, "Installer", "An installer connecting houses to the system")
-System(SmartHome, "SmartHome", "Smart home management system")
+Person(installer, "Installer", "An installer connecting sensors to the system")
+System(SmartHome, "SmartHome", "The heating management system")
+Container(sensors, "Sensors", "Sensors inside a house")
 
 Rel(user, SmartHome, "Uses the system")
-Rel(user, installer, "Depends on to use the system")
-Rel(installer,SmartHome,"Connects users to the system")
+Rel(user, installer, "Orders a setup")
+Rel(installer, sensors, "Sets up")
+Rel(installer, SmartHome, "Connects sensors")
+Rel(SmartHome, sensors, "Polls data from sensors")
 
 @enduml
