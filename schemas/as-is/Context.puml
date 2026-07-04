@@ -1,19 +1,18 @@
 @startuml
-title as is Context Diagram
+title As-Is Context Diagram
 
 top to bottom direction
 
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
-Person(user, "User", "A user of the system")
-Person(installer, "Installer", "An installer connecting sensors to the system")
-System(SmartHome, "SmartHome", "The heating management system")
-Container(sensors, "Sensors", "Sensors inside a house")
+Person(user, "User", "House owner")
+Person(installer, "Installer", "Specialist who installs devices")
+System(SmartHome, "SmartHome", "Heating control system")
+System_Ext(devices, "Heating Devices", "Sensors and relays installed in the house")
 
-Rel(user, SmartHome, "Uses the system")
-Rel(user, installer, "Orders a setup")
-Rel(installer, sensors, "Sets up")
-Rel(installer, SmartHome, "Connects sensors")
-Rel(SmartHome, sensors, "Polls data from sensors")
+Rel(user, SmartHome, "Uses")
+Rel(installer, devices, "Installs")
+Rel(installer, SmartHome, "Connects devices")
+Rel(SmartHome, devices, "Polls temperature and sends commands")
 
 @enduml
