@@ -1,0 +1,16 @@
+@startuml
+title To-Be Identity Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(identity, "Identity Service") {
+  Component(api, "API", "HTTP Controller", "Accepts auth requests")
+  Component(app, "Application Service", "Application Service", "Coordinates user operations")
+  Component(repo, "Repository", "Repository", "Reads and writes user data")
+}
+
+Rel(api, app, "Uses")
+Rel(app, repo, "Uses")
+@enduml

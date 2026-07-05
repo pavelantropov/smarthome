@@ -1,0 +1,19 @@
+@startuml
+title To-Be Automation Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(automation, "Automation Service") {
+  Component(api, "API", "HTTP Controller", "Accepts automation requests")
+  Component(app, "Application Service", "Application Service", "Coordinates automation operations")
+  Component(repo, "Repository", "Repository", "Reads and writes automation settings")
+}
+
+Component(devices, "Device Service", "Microservice", "Controls devices")
+
+Rel(api, app, "Uses")
+Rel(app, repo, "Uses")
+Rel(app, devices, "Sends commands")
+@enduml

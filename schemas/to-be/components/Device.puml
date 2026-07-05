@@ -1,0 +1,18 @@
+@startuml
+title To-Be Device Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(devices, "Device Service") {
+  Component(api, "API", "HTTP Controller", "Accepts device management requests")
+  Component(app, "Application Service", "Application Service", "Coordinates device operations")
+  Component(repo, "Repository", "Repository", "Reads and writes device data")
+  Component(publisher, "Event Publisher", "Adapter", "Publishes commands")
+}
+
+Rel(api, app, "Uses")
+Rel(app, repo, "Uses")
+Rel(app, publisher, "Uses")
+@enduml
