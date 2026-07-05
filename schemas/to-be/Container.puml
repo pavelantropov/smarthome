@@ -48,7 +48,7 @@ Rel(deviceGateway, events, "Publishes telemetry")
 Rel(telemetry, events, "Reads telemetry")
 Rel(devices, events, "Publishes commands")
 Rel(events, deviceGateway, "Reads commands")
-Rel(automation, devices, "Sends commands", "GRPC")
+Rel(automation, devices, "Sends commands", "REST")
 
 Rel(identity, identityDB, "Reads/writes data")
 Rel(telemetry, telemetryDB, "Reads/writes data")

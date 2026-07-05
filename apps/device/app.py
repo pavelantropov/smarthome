@@ -47,8 +47,15 @@ def create_device():
     if error:
         return jsonify({"error": error}), 400
 
+    device_id = body.get("id") or uuid()
+    if not isinstance(device_id, str) or not device_id.strip():
+        return jsonify({"error": "id must be a string"}), 400
+    device_id = device_id.strip()
+    if device_id in devices:
+        return jsonify({"error": "device already exists"}), 409
+
     device = Device(
-        id=uuid(),
+        id=device_id,
         name=body["name"].strip(),
         type=body["type"].strip(),
         location=(body.get("location") or "").strip(),
@@ -160,6 +167,8 @@ def validate_device_payload(body: dict[str, Any], partial: bool) -> str | None:
         return "status must be a string"
     if "metadata" in body and not isinstance(body["metadata"], dict):
         return "metadata must be an object"
+    if "id" in body and not isinstance(body["id"], str):
+        return "id must be a string"
     return None
 
 

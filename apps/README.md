@@ -30,6 +30,11 @@ The API will be available at http://localhost:8080
 The Device Service will be available at http://localhost:8082
 The Telemetry Service will be available at http://localhost:8083
 
+The monolith also exposes integrated routes through http://localhost:8080:
+
+- `/api/v1/devices/*` proxies to the Device Service
+- `/api/v1/telemetry/*` proxies to the Telemetry Service
+
 ### Option 2: Manual setup
 
 If you prefer to run the application without Docker:
@@ -72,6 +77,8 @@ A Postman collection is provided for testing the API. Import the `smarthome-api.
 - `POST /api/devices/:id/commands` - Queue a command
 - `GET /api/devices/:id/commands` - Get queued commands
 
+When a sensor is created, updated, or deleted through the existing `/api/v1/sensors` API, the monolith mirrors that sensor into the Device Service using a stable device ID: `sensor-<sensor_id>`.
+
 ## Telemetry Service Endpoints
 
 - `GET /health` - Health check
@@ -80,3 +87,5 @@ A Postman collection is provided for testing the API. Import the `smarthome-api.
 - `POST /api/telemetry` - Create a telemetry reading
 - `DELETE /api/telemetry/:id` - Delete a telemetry reading
 - `GET /api/telemetry/devices/:device_id/latest` - Get latest readings by metric for a device
+
+When a sensor value is updated through `/api/v1/sensors/:id/value`, the monolith records a telemetry reading for device `sensor-<sensor_id>`.

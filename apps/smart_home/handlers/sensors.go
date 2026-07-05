@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"smarthome/db"
 	"smarthome/models"
@@ -18,13 +19,22 @@ import (
 type SensorHandler struct {
 	DB                 *db.DB
 	TemperatureService *services.TemperatureService
+	DeviceService      *services.DeviceService
+	TelemetryService   *services.TelemetryService
 }
 
 // NewSensorHandler creates a new SensorHandler
-func NewSensorHandler(db *db.DB, temperatureService *services.TemperatureService) *SensorHandler {
+func NewSensorHandler(
+	db *db.DB,
+	temperatureService *services.TemperatureService,
+	deviceService *services.DeviceService,
+	telemetryService *services.TelemetryService,
+) *SensorHandler {
 	return &SensorHandler{
 		DB:                 db,
 		TemperatureService: temperatureService,
+		DeviceService:      deviceService,
+		TelemetryService:   telemetryService,
 	}
 }
 
@@ -59,6 +69,7 @@ func (h *SensorHandler) GetSensors(c *gin.Context) {
 				sensors[i].Value = tempData.Value
 				sensors[i].Status = tempData.Status
 				sensors[i].LastUpdated = tempData.Timestamp
+				h.recordTelemetry(context.Background(), sensors[i])
 				log.Printf("Updated temperature data for sensor %d from external API", sensor.ID)
 			} else {
 				log.Printf("Failed to fetch temperature data for sensor %d: %v", sensor.ID, err)
@@ -91,6 +102,7 @@ func (h *SensorHandler) GetSensorByID(c *gin.Context) {
 			sensor.Value = tempData.Value
 			sensor.Status = tempData.Status
 			sensor.LastUpdated = tempData.Timestamp
+			h.recordTelemetry(context.Background(), sensor)
 			log.Printf("Updated temperature data for sensor %d from external API", sensor.ID)
 		} else {
 			log.Printf("Failed to fetch temperature data for sensor %d: %v", sensor.ID, err)
@@ -142,6 +154,8 @@ func (h *SensorHandler) CreateSensor(c *gin.Context) {
 		return
 	}
 
+	h.syncDevice(context.Background(), sensor)
+
 	c.JSON(http.StatusCreated, sensor)
 }
 
@@ -165,6 +179,8 @@ func (h *SensorHandler) UpdateSensor(c *gin.Context) {
 		return
 	}
 
+	h.syncDevice(context.Background(), sensor)
+
 	c.JSON(http.StatusOK, sensor)
 }
 
@@ -180,6 +196,10 @@ func (h *SensorHandler) DeleteSensor(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	if err := h.DeviceService.DeleteDevice(context.Background(), deviceID(id)); err != nil {
+		log.Printf("Failed to delete device for sensor %d: %v", id, err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Sensor deleted successfully"})
@@ -209,5 +229,48 @@ func (h *SensorHandler) UpdateSensorValue(c *gin.Context) {
 		return
 	}
 
+	sensor, err := h.DB.GetSensorByID(context.Background(), id)
+	if err == nil {
+		h.recordTelemetry(context.Background(), sensor)
+	} else {
+		log.Printf("Failed to load sensor %d for telemetry sync: %v", id, err)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Sensor value updated successfully"})
+}
+
+func (h *SensorHandler) syncDevice(ctx context.Context, sensor models.Sensor) {
+	req := services.DeviceRequest{
+		ID:       deviceID(sensor.ID),
+		Name:     sensor.Name,
+		Type:     string(sensor.Type),
+		Location: sensor.Location,
+		Status:   sensor.Status,
+		Metadata: map[string]any{
+			"legacy_sensor_id": sensor.ID,
+			"source":           "smart_home",
+		},
+	}
+
+	if err := h.DeviceService.CreateDevice(ctx, req); err != nil {
+		if updateErr := h.DeviceService.UpdateDevice(ctx, deviceID(sensor.ID), req); updateErr != nil {
+			log.Printf("Failed to sync device for sensor %d: create error=%v update error=%v", sensor.ID, err, updateErr)
+		}
+	}
+}
+
+func (h *SensorHandler) recordTelemetry(ctx context.Context, sensor models.Sensor) {
+	if err := h.TelemetryService.RecordReading(ctx, services.TelemetryRequest{
+		DeviceID:  deviceID(sensor.ID),
+		Metric:    string(sensor.Type),
+		Value:     sensor.Value,
+		Unit:      sensor.Unit,
+		Timestamp: sensor.LastUpdated.UTC().Format(time.RFC3339),
+	}); err != nil {
+		log.Printf("Failed to record telemetry for sensor %d: %v", sensor.ID, err)
+	}
+}
+
+func deviceID(sensorID int) string {
+	return fmt.Sprintf("sensor-%d", sensorID)
 }
