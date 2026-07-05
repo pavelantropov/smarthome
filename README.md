@@ -92,15 +92,15 @@ Generic
 
 [AS-IS.puml](schemas/as-is/Context.puml)
 
-# Задание 2. Проектирование микросервисной архитектуры 🟡
+# Задание 2. Проектирование микросервисной архитектуры ✅
 
 В этом задании вам нужно предоставить только диаграммы в модели C4. Мы не просим вас отдельно описывать получившиеся микросервисы и то, как вы определили взаимодействия между компонентами To-Be системы. Если вы правильно подготовите диаграммы C4, они и так это покажут.
 
-**Диаграмма контейнеров (Containers)** ✅
+**Диаграмма контейнеров (Containers)**
 
 * [SmartHome Container](schemas/to-be/Container.puml)
 
-**Диаграмма компонентов (Components)** ✅
+**Диаграмма компонентов (Components)**
 
 * [Automation](schemas/to-be/components/Automation.puml)
 * [Catalogue](schemas/to-be/components/Catalogue.puml)
