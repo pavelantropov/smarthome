@@ -1,0 +1,308 @@
+﻿openapi: 3.0.3
+info:
+  title: Device Service API
+  description: >
+    Manages IoT device records and dispatches commands to devices.
+    Part of the SmartHome system (Device Service, Python).
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8082
+    description: Local development
+  - url: https://api.smarthome.example.com/api/devices
+    description: Via API Gateway (/api/devices/*)
+
+tags:
+  - name: Health
+  - name: Devices
+  - name: Commands
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Service health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: device
+
+  /api/devices:
+    get:
+      tags: [Devices]
+      summary: List devices
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Filter by device type
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Filter by device status
+      responses:
+        "200":
+          description: List of devices, sorted by creation date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Device"
+    post:
+      tags: [Devices]
+      summary: Create a device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceCreateRequest"
+      responses:
+        "201":
+          description: Device created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Device with given id already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/devices/{device_id}:
+    parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Devices]
+      summary: Get a device by id
+      responses:
+        "200":
+          description: Device found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "404":
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags: [Devices]
+      summary: Update a device (partial update)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceUpdateRequest"
+      responses:
+        "200":
+          description: Device updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags: [Devices]
+      summary: Delete a device
+      responses:
+        "204":
+          description: Device deleted
+        "404":
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/devices/{device_id}/commands:
+    parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Commands]
+      summary: List commands queued/sent for a device
+      responses:
+        "200":
+          description: List of commands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Command"
+        "404":
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags: [Commands]
+      summary: Queue a command for a device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommandCreateRequest"
+      responses:
+        "202":
+          description: Command accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Command"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          example: offline
+        metadata:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, name, type, status, created_at, updated_at]
+
+    DeviceCreateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Optional client-supplied id; generated if omitted
+        name:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          default: offline
+        metadata:
+          type: object
+          additionalProperties: true
+      required: [name, type]
+
+    DeviceUpdateRequest:
+      type: object
+      description: All fields optional; only provided fields are updated
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Command:
+      type: object
+      properties:
+        id:
+          type: string
+        device_id:
+          type: string
+        command:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+          example: queued
+        created_at:
+          type: string
+          format: date-time
+      required: [id, device_id, command, status, created_at]
+
+    CommandCreateRequest:
+      type: object
+      properties:
+        command:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+      required: [command]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]

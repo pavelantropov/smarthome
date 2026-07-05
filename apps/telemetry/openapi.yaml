@@ -1,0 +1,191 @@
+﻿openapi: 3.0.3
+info:
+  title: Telemetry Service API
+  description: >
+    Ingests and serves device telemetry readings.
+    Part of the SmartHome system (Telemetry Service, Go).
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8083
+    description: Local development
+  - url: https://api.smarthome.example.com/api/telemetry
+    description: Via API Gateway (/api/telemetry/*)
+
+tags:
+  - name: Health
+  - name: Telemetry
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Service health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: telemetry
+
+  /api/telemetry:
+    post:
+      tags: [Telemetry]
+      summary: Record a telemetry reading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadingRequest"
+      responses:
+        "201":
+          description: Reading recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryReading"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags: [Telemetry]
+      summary: List telemetry readings
+      parameters:
+        - name: device_id
+          in: query
+          schema:
+            type: string
+          description: Filter by device id
+        - name: metric
+          in: query
+          schema:
+            type: string
+          description: Filter by metric name
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+          description: Max number of readings to return (most recent first)
+      responses:
+        "200":
+          description: List of readings, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelemetryReading"
+
+  /api/telemetry/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Telemetry]
+      summary: Get a single telemetry reading by id
+      responses:
+        "200":
+          description: Reading found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryReading"
+        "404":
+          description: Reading not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags: [Telemetry]
+      summary: Delete a telemetry reading
+      responses:
+        "204":
+          description: Reading deleted
+        "404":
+          description: Reading not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/telemetry/devices/{device_id}/latest:
+    parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Telemetry]
+      summary: Get the latest reading per metric for a device
+      responses:
+        "200":
+          description: Map of metric name to latest reading
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: "#/components/schemas/TelemetryReading"
+
+components:
+  schemas:
+    TelemetryReading:
+      type: object
+      properties:
+        id:
+          type: string
+        device_id:
+          type: string
+        metric:
+          type: string
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required: [id, device_id, metric, value, timestamp]
+
+    ReadingRequest:
+      type: object
+      properties:
+        device_id:
+          type: string
+        metric:
+          type: string
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC3339 timestamp; defaults to server time if omitted
+      required: [device_id, metric, value]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
