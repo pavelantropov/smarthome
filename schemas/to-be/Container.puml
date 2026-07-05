@@ -13,14 +13,14 @@ System_Boundary(SmartHome, "SmartHome") {
   Container(app, "Web/Mobile App", "SPA", "UI")
   Container(api, "Api Gateway", "", "Entry Point")
 
-  Container(identity, "Identity Service", ".NET", "User data")
+  Container(identity, "Identity Service", "Go", "User data")
 
   Container(catalogue, "Catalogue Service", ".NET", "Online store")
   Container(payments, "Payments Gateway", "Go", "Payments gateway")
 
   Container(telemetry, "Telemetry Service", "Go", "Monitors devices telemetry")
   Container(devices, "Device Service", "Go", "Controls devices")
-  Container(automation, "Automation Service", "Go", "Controls automation")
+  Container(automation, "Automation Service", "Python", "Controls automation")
 
   Container(deviceGateway, "Device Gateway", "Python", "API for devices")
   Container(events, "Event Bus", "Kafka", "Device events")
@@ -48,6 +48,7 @@ Rel(deviceGateway, events, "Publishes telemetry")
 Rel(telemetry, events, "Reads telemetry")
 Rel(devices, events, "Publishes commands")
 Rel(events, deviceGateway, "Reads commands")
+Rel(automation, devices, "Sends commands", "GRPC")
 
 Rel(identity, identityDB, "Reads/writes data")
 Rel(telemetry, telemetryDB, "Reads/writes data")
