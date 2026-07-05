@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "R:\\repos\\smarthome\\catalogue\\Catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj": {}
+    "R:\\repos\\smarthome\\apps\\catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj": {}
   },
   "projects": {
-    "R:\\repos\\smarthome\\catalogue\\Catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj": {
+    "R:\\repos\\smarthome\\apps\\catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "R:\\repos\\smarthome\\catalogue\\Catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj",
+        "projectUniqueName": "R:\\repos\\smarthome\\apps\\catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj",
         "projectName": "Catalogue.Api",
-        "projectPath": "R:\\repos\\smarthome\\catalogue\\Catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj",
+        "projectPath": "R:\\repos\\smarthome\\apps\\catalogue\\src\\Catalogue.Api\\Catalogue.Api.csproj",
         "packagesPath": "C:\\Users\\pmant\\.nuget\\packages\\",
-        "outputPath": "R:\\repos\\smarthome\\catalogue\\Catalogue\\src\\Catalogue.Api\\obj\\",
+        "outputPath": "R:\\repos\\smarthome\\apps\\catalogue\\src\\Catalogue.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
