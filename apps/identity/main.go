@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
 	"identity/domain"
 	"log/slog"
 	"os"
@@ -23,7 +23,7 @@ func main() {
 	cfg := config.Load()
 
 	// Setup logger
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	appLogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	// Connect to database
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -36,10 +36,10 @@ func main() {
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: gormlogger.Default.LogMode(gormlogger.Info),
 	})
 	if err != nil {
-		logger.Error("Failed to connect to database", "error", err)
+		appLogger.Error("Failed to connect to database", "error", err)
 		os.Exit(1)
 	}
 
@@ -50,7 +50,7 @@ func main() {
 		&domain.Role{},
 		&domain.UserRole{},
 	); err != nil {
-		logger.Error("Failed to migrate database", "error", err)
+		appLogger.Error("Failed to migrate database", "error", err)
 		os.Exit(1)
 	}
 
@@ -64,10 +64,10 @@ func main() {
 	// Setup services
 	passwordSvc := service.NewPasswordService()
 	tokenSvc := service.NewTokenService(&cfg.JWT)
-	authSvc := service.NewAuthService(userRepo, refreshRepo, tokenSvc, passwordSvc, cfg, logger)
+	authSvc := service.NewAuthService(userRepo, refreshRepo, tokenSvc, passwordSvc, cfg, appLogger)
 
 	// Setup handlers
-	authHandler := handler.NewAuthHandler(authSvc, logger)
+	authHandler := handler.NewAuthHandler(authSvc, appLogger)
 
 	// Setup router
 	router := gin.Default()
@@ -109,9 +109,9 @@ func main() {
 	}
 
 	// Start server
-	logger.Info("Starting identity service", "port", cfg.Server.Port)
+	appLogger.Info("Starting identity service", "port", cfg.Server.Port)
 	if err := router.Run(":" + cfg.Server.Port); err != nil {
-		logger.Error("Failed to start server", "error", err)
+		appLogger.Error("Failed to start server", "error", err)
 		os.Exit(1)
 	}
 }
