@@ -1,0 +1,61 @@
+@startuml
+title Telemetry Service Code Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class TelemetryApi {
+  +POST /api/telemetry
+  +GET /api/telemetry
+  +GET /api/telemetry/{id}
+  +DELETE /api/telemetry/{id}
+  +GET /api/telemetry/devices/{device_id}/latest
+}
+
+class TelemetryApplicationService {
+  +Add(request)
+  +List(deviceId, metric, limit)
+  +Get(id)
+  +Delete(id)
+  +LatestByDevice(deviceId)
+}
+
+class TelemetryRepository {
+  +map readings
+  +Add(request)
+  +List(deviceId, metric, limit)
+  +Get(id)
+  +Delete(id)
+  +LatestByDevice(deviceId)
+}
+
+class ReadingRequest {
+  +string device_id
+  +string metric
+  +float value
+  +string unit
+  +string timestamp
+}
+
+class TelemetryReading {
+  +string id
+  +string device_id
+  +string metric
+  +float value
+  +string unit
+  +time timestamp
+}
+
+class TelemetryDb <<database>> {
+  +engine: InfluxDB
+  +status: planned
+}
+
+TelemetryApi --> TelemetryApplicationService : delegates requests
+TelemetryApplicationService --> TelemetryRepository : reads/writes readings
+TelemetryApplicationService --> ReadingRequest : validates
+TelemetryRepository --> TelemetryReading : stores
+TelemetryRepository ..> TelemetryDb : planned persistence
+
+@enduml

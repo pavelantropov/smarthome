@@ -1,0 +1,81 @@
+@startuml
+title Device Service Code Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class DeviceApi {
+  +create_device()
+  +list_devices()
+  +get_device(device_id)
+  +update_device(device_id)
+  +delete_device(device_id)
+  +create_command(device_id)
+  +list_commands(device_id)
+}
+
+class DeviceApplicationService {
+  +validate_device_payload(body, partial)
+  +create_device(body)
+  +update_device(device_id, body)
+  +delete_device(device_id)
+}
+
+class CommandApplicationService {
+  +queue_command(device_id, body)
+  +list_commands(device_id)
+}
+
+class DeviceRepository {
+  +dict devices
+  +add(device)
+  +get(device_id)
+  +list(type, status)
+  +update(device)
+  +delete(device_id)
+}
+
+class CommandRepository {
+  +dict commands
+  +add(device_id, command)
+  +list(device_id)
+  +delete_for_device(device_id)
+}
+
+class Device {
+  +string id
+  +string name
+  +string type
+  +string location
+  +string status
+  +dict metadata
+  +string created_at
+  +string updated_at
+}
+
+class Command {
+  +string id
+  +string device_id
+  +string command
+  +dict payload
+  +string status
+  +string created_at
+}
+
+class DevicesDb <<database>> {
+  +engine: PostgreSQL
+  +status: planned
+}
+
+DeviceApi --> DeviceApplicationService : delegates device requests
+DeviceApi --> CommandApplicationService : delegates command requests
+DeviceApplicationService --> DeviceRepository : reads/writes devices
+CommandApplicationService --> DeviceRepository : validates device exists
+CommandApplicationService --> CommandRepository : reads/writes commands
+DeviceRepository --> Device : stores
+CommandRepository --> Command : stores
+DeviceRepository ..> DevicesDb : planned persistence
+CommandRepository ..> DevicesDb : planned persistence
+
+@enduml

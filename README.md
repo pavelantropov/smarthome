@@ -110,7 +110,10 @@ Generic
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+* [Code diagrams index](schemas/to-be/code/Code.puml)
+* [SmartHome monolith integration](schemas/to-be/code/MonolithIntegration.puml)
+* [Device Service](schemas/to-be/code/DeviceService.puml)
+* [Telemetry Service](schemas/to-be/code/TelemetryService.puml)
 
 # Задание 3. Разработка ER-диаграммы 🟡
 
@@ -182,7 +185,7 @@ Locations - название комнаты, sensorId - идентификато
 Ревьюер будет проверять точно так же.
 
 
-# **Задание 6. Разработка MVP** 🟡
+# **Задание 6. Разработка MVP** ✅
 
 Необходимо создать новые микросервисы и обеспечить их интеграции с существующим монолитом для плавного перехода к микросервисной архитектуре. 
 

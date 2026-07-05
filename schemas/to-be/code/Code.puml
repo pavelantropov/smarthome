@@ -1,34 +1,15 @@
 @startuml
-title To-Be FitLife Membership Management Code Diagram
+title To-Be Code Diagrams Index
 
 top to bottom direction
 
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
-class User {
-  +String name
-  +String email
-  +List<Membership> memberships
-  +void register()
-  +void login()
-}
+Component(monolithIntegration, "MonolithIntegration.puml", "Code diagram", "How the existing SmartHome API integrates with new Device and Telemetry services")
+Component(deviceService, "DeviceService.puml", "Code diagram", "Important classes and runtime data structures in the Device Service")
+Component(telemetryService, "TelemetryService.puml", "Code diagram", "Important types and store operations in the Telemetry Service")
 
-class Membership {
-  +String type
-  +Date startDate
-  +Date endDate
-  +void activate()
-  +void cancel()
-}
-
-class Schedule {
-  +Date date
-  +String activity
-  +void addActivity()
-  +void removeActivity()
-}
-
-User "1" -- "0..*" Membership : has
-Membership "1" -- "0..*" Schedule : includes
+Rel(monolithIntegration, deviceService, "Calls Device Service API")
+Rel(monolithIntegration, telemetryService, "Calls Telemetry Service API")
 
 @enduml
