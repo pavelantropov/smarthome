@@ -27,6 +27,8 @@ docker-compose up -d
 ```
 
 The API will be available at http://localhost:8080
+The Device Service will be available at http://localhost:8082
+The Telemetry Service will be available at http://localhost:8083
 
 ### Option 2: Manual setup
 
@@ -58,3 +60,23 @@ A Postman collection is provided for testing the API. Import the `smarthome-api.
 - `PUT /api/v1/sensors/:id` - Update a sensor
 - `DELETE /api/v1/sensors/:id` - Delete a sensor
 - `PATCH /api/v1/sensors/:id/value` - Update a sensor's value and status
+
+## Device Service Endpoints
+
+- `GET /health` - Health check
+- `GET /api/devices` - Get all devices
+- `GET /api/devices/:id` - Get a device
+- `POST /api/devices` - Create a device
+- `PUT /api/devices/:id` - Update a device
+- `DELETE /api/devices/:id` - Delete a device
+- `POST /api/devices/:id/commands` - Queue a command
+- `GET /api/devices/:id/commands` - Get queued commands
+
+## Telemetry Service Endpoints
+
+- `GET /health` - Health check
+- `GET /api/telemetry` - Get telemetry readings
+- `GET /api/telemetry/:id` - Get a telemetry reading
+- `POST /api/telemetry` - Create a telemetry reading
+- `DELETE /api/telemetry/:id` - Delete a telemetry reading
+- `GET /api/telemetry/devices/:device_id/latest` - Get latest readings by metric for a device

@@ -1,35 +1,19 @@
-# Build stage
 FROM golang:1.22-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy go.mod and go.sum files
-COPY go.mod go.sum ./
-
-# Download dependencies
+COPY go.mod ./
 RUN go mod download
 
-# Copy the source code
 COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o telemetry ./main.go
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o telemetry
+FROM alpine:3.20
 
-# Runtime stage
-FROM alpine:latest
+RUN apk --no-cache add ca-certificates
 
-# Install necessary runtime dependencies
-RUN apk --no-cache add ca-certificates tzdata
-
-# Set working directory
 WORKDIR /app
-
-# Copy the binary from the builder stage
 COPY --from=builder /app/telemetry .
 
-# Expose the port the app runs on
-EXPOSE 8080
-
-# Command to run the application
+EXPOSE 8083
 CMD ["./telemetry"]

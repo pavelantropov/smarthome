@@ -19,7 +19,7 @@ System_Boundary(SmartHome, "SmartHome") {
   Container(payments, "Payments Gateway", "Go", "Payments gateway")
 
   Container(telemetry, "Telemetry Service", "Go", "Monitors devices telemetry")
-  Container(devices, "Device Service", "Go", "Controls devices")
+  Container(devices, "Device Service", "Python", "Controls devices")
   Container(automation, "Automation Service", "Python", "Controls automation")
 
   Container(deviceGateway, "Device Gateway", "Python", "API for devices")

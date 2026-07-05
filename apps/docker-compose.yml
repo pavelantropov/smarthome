@@ -52,6 +52,28 @@ services:
     networks:
       - smarthome-network
 
+  device:
+    build:
+      context: ./device
+      dockerfile: Dockerfile
+    container_name: smarthome-device
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  telemetry:
+    build:
+      context: ./telemetry
+      dockerfile: Dockerfile
+    container_name: smarthome-telemetry
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
 volumes:
   postgres_data:
 
