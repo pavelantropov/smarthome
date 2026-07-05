@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"identity/internal/domain"
+	"identity/domain"
 	"time"
 )
 

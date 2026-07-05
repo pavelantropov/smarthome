@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
+	"identity/domain"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"identity/internal/domain"
 )
 
 type UserRepository struct {

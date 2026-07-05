@@ -6,8 +6,8 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"identity/internal/config"
-	"identity/internal/domain"
+	"identity/config"
+	"identity/domain"
 	"time"
 )
 
