@@ -1,0 +1,184 @@
+@startuml
+title SmartHome To-Be ER Diagram
+
+hide circle
+skinparam linetype ortho
+
+entity "users" as users {
+  * id : uuid <<PK>>
+  --
+  * email : varchar <<UK>>
+  * username : varchar <<UK>>
+  * password_hash : varchar
+  first_name : varchar
+  last_name : varchar
+  phone_number : varchar
+  is_email_verified : boolean
+  is_active : boolean
+  created_at : timestamp
+  updated_at : timestamp
+  last_login_at : timestamp
+}
+
+entity "roles" as roles {
+  * id : uuid <<PK>>
+  --
+  * name : varchar <<UK>>
+  description : varchar
+}
+
+entity "user_roles" as user_roles {
+  * user_id : uuid <<PK, FK>>
+  * role_id : uuid <<PK, FK>>
+}
+
+entity "refresh_tokens" as refresh_tokens {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  * token : varchar <<UK>>
+  * expires_at : timestamp
+  is_revoked : boolean
+  created_at : timestamp
+  created_by_ip : varchar
+  revoked_at : timestamp
+  revoked_by_ip : varchar
+  reason : varchar
+}
+
+entity "devices" as devices {
+  * id : varchar <<PK>>
+  --
+  * name : varchar
+  * type : varchar
+  location : varchar
+  status : varchar
+  metadata : json
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "device_commands" as device_commands {
+  * id : uuid <<PK>>
+  --
+  * device_id : varchar <<FK>>
+  * command : varchar
+  payload : json
+  status : varchar
+  created_at : timestamp
+  executed_at : timestamp
+}
+
+entity "telemetry_readings" as telemetry_readings {
+  * id : uuid <<PK>>
+  --
+  * device_id : varchar <<FK>>
+  * metric : varchar
+  * value : float
+  unit : varchar
+  timestamp : timestamp
+}
+
+entity "automation_rules" as automation_rules {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  * name : varchar
+  is_enabled : boolean
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "automation_conditions" as automation_conditions {
+  * id : uuid <<PK>>
+  --
+  * rule_id : uuid <<FK>>
+  * device_id : varchar <<FK>>
+  * metric : varchar
+  * operator : varchar
+  * threshold_value : float
+}
+
+entity "automation_actions" as automation_actions {
+  * id : uuid <<PK>>
+  --
+  * rule_id : uuid <<FK>>
+  * device_id : varchar <<FK>>
+  * command : varchar
+  payload : json
+}
+
+entity "products" as products {
+  * id : uuid <<PK>>
+  --
+  * name : varchar
+  description : text
+  device_type : varchar
+  price : decimal
+  is_active : boolean
+}
+
+entity "orders" as orders {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  status : varchar
+  total_amount : decimal
+  created_at : timestamp
+}
+
+entity "order_items" as order_items {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * product_id : uuid <<FK>>
+  quantity : integer
+  unit_price : decimal
+}
+
+entity "payments" as payments {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  provider : varchar
+  provider_payment_id : varchar
+  status : varchar
+  amount : decimal
+  created_at : timestamp
+}
+
+entity "legacy_sensors" as legacy_sensors {
+  * id : integer <<PK>>
+  --
+  * name : varchar
+  * type : varchar
+  * location : varchar
+  value : float
+  unit : varchar
+  status : varchar
+  last_updated : timestamp
+  created_at : timestamp
+}
+
+users ||--o{ refresh_tokens : owns
+users ||--o{ user_roles : has
+roles ||--o{ user_roles : grants
+
+devices ||--o{ device_commands : receives
+devices ||--o{ telemetry_readings : reports
+
+users ||--o{ automation_rules : owns
+automation_rules ||--o{ automation_conditions : contains
+automation_rules ||--o{ automation_actions : contains
+devices ||--o{ automation_conditions : evaluated_by
+devices ||--o{ automation_actions : controls
+
+users ||--o{ orders : places
+orders ||--o{ order_items : contains
+products ||--o{ order_items : ordered_as
+orders ||--o{ payments : paid_by
+
+legacy_sensors .. devices : mirrored as "sensor-<id>"
+legacy_sensors .. telemetry_readings : migrated readings
+
+@enduml

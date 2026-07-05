@@ -1,0 +1,58 @@
+@startuml
+title To-Be Container Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User", "A user of the system")
+System_Ext(device, "IoT Device", "Physical IoT device")
+System_Ext(paymentsExt, "Payments API", "External payment system")
+
+System_Boundary(SmartHome, "SmartHome") {
+  Container(app, "Web/Mobile App", "SPA", "UI")
+  Container(api, "Api Gateway", "", "Entry Point")
+
+  Container(identity, "Identity Service", "Go", "User data")
+
+  Container(catalogue, "Catalogue Service", ".NET", "Online store")
+  Container(payments, "Payments Gateway", "Go", "Payments gateway")
+
+  Container(telemetry, "Telemetry Service", "Go", "Monitors devices telemetry")
+  Container(devices, "Device Service", "Python", "Controls devices")
+  Container(automation, "Automation Service", "Python", "Controls automation")
+
+  Container(deviceGateway, "Device Gateway", "Python", "API for devices")
+  Container(events, "Event Bus", "Kafka", "Device events")
+
+  Container(identityDB, "Identity DB", "PostgreSQL", "Stores user data")
+  Container(catalogueDB, "Catalogue DB", "PostgreSQL", "Stores catalogue data")
+  Container(devicesDB, "Devices DB", "PostgreSQL", "Stores devices settings")
+  Container(automationDB, "Automation DB", "PostgreSQL", "Stores automation settings")
+  Container(telemetryDB, "Telemetry DB", "InfluxDB", "Stores devices telemetry")
+}
+
+Rel(user, app, "Uses")
+Rel(app, api, "HTTPS")
+Rel(api, identity, "Auth")
+Rel(api, catalogue, "Routes /api/catalogue/*", "HTTP")
+Rel(api, telemetry, "Routes /api/telemetry/*", "HTTP")
+Rel(api, devices, "Routes /api/devices/*", "HTTP")
+Rel(api, automation, "Routes /api/automation/*", "HTTP")
+
+Rel(catalogue, payments, "Uses")
+Rel(payments, paymentsExt, "Processes payments")
+
+Rel(device, deviceGateway, "Sends telemetry and reads commands")
+Rel(deviceGateway, events, "Publishes telemetry")
+Rel(telemetry, events, "Reads telemetry")
+Rel(devices, events, "Publishes commands")
+Rel(events, deviceGateway, "Reads commands")
+Rel(automation, devices, "Sends commands", "REST")
+
+Rel(identity, identityDB, "Reads/writes data")
+Rel(telemetry, telemetryDB, "Reads/writes data")
+Rel(devices, devicesDB, "Reads/writes data")
+Rel(automation, automationDB, "Reads/writes data")
+Rel(catalogue, catalogueDB, "Reads/writes data")
+@enduml

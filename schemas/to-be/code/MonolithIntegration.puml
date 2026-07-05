@@ -1,0 +1,100 @@
+@startuml
+title SmartHome Monolith Integration Code Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class SensorHandler {
+  +RegisterRoutes(router)
+  +CreateSensor(ctx)
+  +UpdateSensor(ctx)
+  +DeleteSensor(ctx)
+  +UpdateSensorValue(ctx)
+  -syncDevice(ctx, sensor)
+  -recordTelemetry(ctx, sensor)
+}
+
+class ProxyHandler {
+  +RegisterRoutes(router)
+  -proxyDevices(ctx)
+  -proxyTelemetry(ctx)
+}
+
+class DeviceServiceClient {
+  +CreateDevice(ctx, request)
+  +UpdateDevice(ctx, deviceId, request)
+  +DeleteDevice(ctx, deviceId)
+  -sendJSON(ctx, method, path, request)
+}
+
+class TelemetryServiceClient {
+  +RecordReading(ctx, request)
+}
+
+class TemperatureServiceClient {
+  +GetTemperature(location)
+  +GetTemperatureByID(sensorId)
+}
+
+class SensorRepository {
+  +CreateSensor(ctx, sensor)
+  +UpdateSensor(ctx, id, sensor)
+  +DeleteSensor(ctx, id)
+  +UpdateSensorValue(ctx, id, value, status)
+  +GetSensorByID(ctx, id)
+}
+
+class Sensor {
+  +int id
+  +string name
+  +SensorType type
+  +string location
+  +float value
+  +string unit
+  +string status
+}
+
+class DeviceRequest {
+  +string id
+  +string name
+  +string type
+  +string location
+  +string status
+  +map metadata
+}
+
+class TelemetryRequest {
+  +string device_id
+  +string metric
+  +float value
+  +string unit
+  +string timestamp
+}
+
+class DeviceApi <<external API>> {
+  +HTTP /api/devices
+}
+
+class TelemetryApi <<external API>> {
+  +HTTP /api/telemetry
+}
+
+class TemperatureApi <<external API>> {
+  +HTTP /temperature
+}
+
+SensorHandler --> SensorRepository : reads/writes legacy sensors
+SensorHandler --> TemperatureServiceClient : fetches current temperature
+SensorHandler --> DeviceServiceClient : mirrors sensor lifecycle
+SensorHandler --> TelemetryServiceClient : records sensor readings
+SensorHandler --> Sensor : handles
+DeviceServiceClient --> DeviceRequest : sends
+TelemetryServiceClient --> TelemetryRequest : sends
+DeviceServiceClient --> DeviceApi : HTTP
+TelemetryServiceClient --> TelemetryApi : HTTP
+TemperatureServiceClient --> TemperatureApi : HTTP
+ProxyHandler --> DeviceApi : proxies /api/v1/devices/*
+ProxyHandler --> TelemetryApi : proxies /api/v1/telemetry/*
+
+@enduml

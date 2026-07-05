@@ -1,0 +1,15 @@
+@startuml
+title To-Be Code Diagrams Index
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Component(monolithIntegration, "MonolithIntegration.puml", "Code diagram", "How the existing SmartHome API integrates with new Device and Telemetry services")
+Component(deviceService, "DeviceService.puml", "Code diagram", "Important classes and runtime data structures in the Device Service")
+Component(telemetryService, "TelemetryService.puml", "Code diagram", "Important types and store operations in the Telemetry Service")
+
+Rel(monolithIntegration, deviceService, "Calls Device Service API")
+Rel(monolithIntegration, telemetryService, "Calls Telemetry Service API")
+
+@enduml

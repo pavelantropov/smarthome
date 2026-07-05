@@ -1,0 +1,19 @@
+@startuml
+title To-Be Catalogue Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(catalogue, "Catalogue Service") {
+  Component(api, "API", "HTTP Controller", "Accepts online store requests")
+  Component(app, "Application Service", "Application Service", "Coordinates online store operations")
+  Component(repo, "Repository", "Repository", "Reads and writes catalogue data")
+}
+
+Component(payments, "Payments Gateway", "Microservice", "Payments gateway")
+
+Rel(api, app, "Uses")
+Rel(app, repo, "Uses")
+Rel(app, payments, "Uses")
+@enduml
