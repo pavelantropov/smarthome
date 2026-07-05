@@ -3,10 +3,11 @@ package repository
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"identity/domain"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type RefreshTokenRepository struct {
